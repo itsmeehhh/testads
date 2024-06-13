@@ -1,0 +1,6 @@
+
+const { setInterval } = require('timers');
+
+setInterval(() => {
+  console.log('Hello World');
+}, 1000);
