@@ -11,7 +11,12 @@ async function openPage(userAgent) {
     let browser;
     try {
       browser = await firefox.launch({ headless: false });
-      const context = await browser.newContext();
+      
+      const context = await browser.newContext({
+        userAgent: userAgent,
+        viewport: { width: 1280, height: 720 },
+        ignoreHTTPSErrors: true,
+      });
 
       // تحويل الكوكيز إلى صيغة يمكن استخدامها مع Playwright
       const cookies = youtubeCookies.split('; ').map(cookieStr => {
@@ -21,7 +26,6 @@ async function openPage(userAgent) {
 
       await context.addCookies(cookies);
       const page = await context.newPage();
-      await page.setUserAgent(userAgent);
       await page.goto('https://youtube.com', { timeout: 60000 });
 
       // تحقق من تسجيل الدخول
