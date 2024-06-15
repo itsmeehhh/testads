@@ -16,15 +16,27 @@ async function openPage(userAgent) {
       // تحويل الكوكيز إلى صيغة يمكن استخدامها مع Playwright
       const cookies = youtubeCookies.split('; ').map(cookieStr => {
         const [name, value] = cookieStr.split('=');
-        return { name, value, domain: '.youtube.com' };
+        return { name, value, domain: '.youtube.com', path: '/' };
       });
 
       await context.addCookies(cookies);
       const page = await context.newPage();
       await page.setUserAgent(userAgent);
-      await page.goto(url, { timeout: 60000 });
-      await page.click('button[aria-label="Play"]');
-      await page.waitForTimeout(30000);
+      await page.goto('https://youtube.com', { timeout: 60000 });
+
+      // تحقق من تسجيل الدخول
+      const loginStatus = await page.evaluate(() => {
+        return document.cookie.includes('SID=');
+      });
+
+      if (loginStatus) {
+        console.log('Successfully logged in to YouTube');
+        await page.goto(url, { timeout: 60000 });
+        await page.click('button[aria-label="Play"]');
+        await page.waitForTimeout(30000);
+      } else {
+        console.log('Failed to log in to YouTube');
+      }
       resolve();
     } catch (error) {
       console.error('error:', error);
