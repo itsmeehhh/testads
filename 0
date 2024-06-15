@@ -24,6 +24,10 @@ async function openPage() {
       });
 
       const page = await context.newPage();
+      // Add code here to navigate to the YouTube homepage or any other page to ensure the login state persists
+      await page.goto("https://youtube.com", { timeout: 60000 });
+      await page.waitForSelector('button[aria-label="Sign in"]');
+      // You may need to add code here to handle any additional steps required to maintain the login state
       await page.goto(url, { timeout: 60000 });
       await page.click('button[aria-label="Play"]');
       await page.waitForTimeout(30000);
