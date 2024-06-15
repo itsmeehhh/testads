@@ -3,54 +3,50 @@ import UserAgent from 'user-agents';
 
 const youtubeCookies = 'SOCS=CAISEwgDEgk2MzcwNjAwNTcaAmFyIAEaBgiAvdSyBg; PREF=tz=Africa.Casablanca&f7=4100&f4=4000000; APISID=X_heg210ystbf7Gk/A1l8xHtkeq5nCKCmb; SAPISID=6fWfh_ffhP8GhFBe/ANO53-z5WbRCV4iXB; __Secure-1PAPISID=6fWfh_ffhP8GhFBe/ANO53-z5WbRCV4iXB; __Secure-3PAPISID=6fWfh_ffhP8GhFBe/ANO53-z5WbRCV4iXB; SID=g.a000kwhLhAh-by0XSp1LFMkEF_RA-CcwqWlOFcds0bo_gRft_y9MjvIW-jtcjGM___lvWGFt0AACgYKAYkSARMSFQHGX2MiAMSySNWs2ov-AoNLYO5fPxoVAUF8yKoRkl1Mp2GijHz6UOTRikcr0076; ST-6hujrl=csn=dsnYcuC-gtMIU3K6&itct=CBQQwJ4JGAAiEwi29dWb1t2GAxW6IAYAHZhqDaI%3D; SIDCC=AKEyXzWi5nrS6l6F4Km_pyPOAeLnMvJEK3AY1lDxYkZtMTAlwWTJ_JNzob3jK8e9UuNYf61i';
 
-let url = "https://youtube.com/shorts/sI9VgfUvoI8?si=sLntyiaXnaO1Ol95";
+const url = "https://youtube.com/shorts/sI9VgfUvoI8?si=sLntyiaXnaO1Ol95";
 console.log(`watching: ${url}`);
 
 async function openPage(userAgent) {
-  return new Promise(async (resolve, reject) => {
-    let browser;
-    try {
-      browser = await firefox.launch({ headless: false });
-      
-      const context = await browser.newContext({
-        userAgent: userAgent,
-        viewport: { width: 1280, height: 720 },
-        ignoreHTTPSErrors: true,
-      });
+  let browser;
+  try {
+    browser = await firefox.launch({ headless: false });
+    
+    const context = await browser.newContext({
+      userAgent: userAgent,
+      viewport: { width: 1280, height: 720 },
+      ignoreHTTPSErrors: true,
+    });
 
-      // تحويل الكوكيز إلى صيغة يمكن استخدامها مع Playwright
-      const cookies = youtubeCookies.split('; ').map(cookieStr => {
-        const [name, value] = cookieStr.split('=');
-        return { name, value, domain: '.youtube.com', path: '/' };
-      });
+    // تحويل الكوكيز إلى صيغة يمكن استخدامها مع Playwright
+    const cookies = youtubeCookies.split('; ').map(cookieStr => {
+      const [name, value] = cookieStr.split('=');
+      return { name, value, domain: '.youtube.com', path: '/' };
+    });
 
-      await context.addCookies(cookies);
-      const page = await context.newPage();
-      await page.goto('https://youtube.com', { timeout: 60000 });
+    await context.addCookies(cookies);
+    const page = await context.newPage();
+    await page.goto('https://youtube.com', { timeout: 60000 });
 
-      // تحقق من تسجيل الدخول
-      const loginStatus = await page.evaluate(() => {
-        return document.cookie.includes('SID=');
-      });
+    // تحقق من تسجيل الدخول
+    const loginStatus = await page.evaluate(() => {
+      return document.cookie.includes('SID=');
+    });
 
-      if (loginStatus) {
-        console.log('Successfully logged in to YouTube');
-        await page.goto(url, { timeout: 60000 });
-        await page.click('button[aria-label="Play"]');
-        await page.waitForTimeout(30000);
-      } else {
-        console.log('Failed to log in to YouTube');
-      }
-      resolve();
-    } catch (error) {
-      console.error('error:', error);
-      reject(error);
-    } finally {
-      if (browser) {
-        await browser.close();
-      }
+    if (loginStatus) {
+      console.log('Successfully logged in to YouTube');
+      await page.goto(url, { timeout: 60000 });
+      await page.click('button[aria-label="Play"]');
+      await page.waitForTimeout(30000);
+    } else {
+      console.log('Failed to log in to YouTube');
     }
-  });
+  } catch (error) {
+    console.error('error:', error);
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
 }
 
 async function executeInParallel() {
