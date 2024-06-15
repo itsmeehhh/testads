@@ -2,16 +2,9 @@ import { firefox } from 'playwright';
 import UserAgent from 'user-agents';
 
 let url = "https://youtube.com/shorts/sI9VgfUvoI8?si=sLntyiaXnaO1Ol95";
-console.log(`watching: ${url}`);
+console.log(`مشاهدة: ${url}`);
 
-const cookiesString = 'SOCS=CAISEwgDEgk2MzcwNjAwNTcaAmFyIAEaBgiAvdSyBg; PREF=tz=Africa.Casablanca&f7=4100&f4=4000000; APISID=X_heg210ystbf7Gk/A1l8xHtkeq5nCKCmb; SAPISID=6fWfh_ffhP8GhFBe/ANO53-z5WbRCV4iXB; __Secure-1PAPISID=6fWfh_ffhP8GhFBe/ANO53-z5WbRCV4iXB; __Secure-3PAPISID=6fWfh_ffhP8GhFBe/ANO53-z5WbRCV4iXB; SID=g.a000kwhLhAh-by0XSp1LFMkEF_RA-CcwqWlOFcds0bo_gRft_y9MjvIW-jtcjGM___lvWGFt0AACgYKAYkSARMSFQHGX2MiAMSySNWs2ov-AoNLYO5fPxoVAUF8yKoRkl1Mp2GijHz6UOTRikcr0076; ST-6hujrl=csn=dsnYcuC-gtMIU3K6&itct=CBQQwJ4JGAAiEwi29dWb1t2GAxW6IAYAHZhqDaI%3D; SIDCC=AKEyXzWi5nrS6l6F4Km_pyPOAeLnMvJEK3AY1lDxYkZtMTAlwWTJ_JNzob3jK8e9UuNYf61i';
-
-const cookies = {};
-
-cookiesString.split('; ').forEach(cookie => {
-  const [name, value] = cookie.split('=');
-  cookies[name] = value;
-});
+const cookies = 'SOCS=CAISEwgDEgk2MzcwNjAwNTcaAmFyIAEaBgiAvdSyBg; PREF=tz=Africa.Casablanca&f7=4100&f4=4000000; APISID=X_heg210ystbf7Gk/A1l8xHtkeq5nCKCmb; SAPISID=6fWfh_ffhP8GhFBe/ANO53-z5WbRCV4iXB; __Secure-1PAPISID=6fWfh_ffhP8GhFBe/ANO53-z5WbRCV4iXB; __Secure-3PAPISID=6fWfh_ffhP8GhFBe/ANO53-z5WbRCV4iXB; SID=g.a000kwhLhAh-by0XSp1LFMkEF_RA-CcwqWlOFcds0bo_gRft_y9MjvIW-jtcjGM___lvWGFt0AACgYKAYkSARMSFQHGX2MiAMSySNWs2ov-AoNLYO5fPxoVAUF8yKoRkl1Mp2GijHz6UOTRikcr0076; ST-6hujrl=csn=dsnYcuC-gtMIU3K6&itct=CBQQwJ4JGAAiEwi29dWb1t2GAxW6IAYAHZhqDaI%3D; SIDCC=AKEyXzWi5nrS6l6F4Km_pyPOAeLnMvJEK3AY1lDxYkZtMTAlwWTJ_JNzob3jK8e9UuNYf61i';
 
 async function openPage() {
   return new Promise(async (resolve, reject) => {
@@ -19,12 +12,15 @@ async function openPage() {
     try {
       browser = await firefox.launch({ headless: false });
       const context = await browser.newContext({
-        cookies: Object.entries(cookies).map(([name, value]) => ({
-          name,
-          value,
-          domain: '.youtube.com',
-          path: '/'
-        }))
+        cookies: cookies.split(';').map(cookie => {
+          const [name, value] = cookie.split('=');
+          return {
+            name: name.trim(),
+            value: value.trim(),
+            domain: '.youtube.com',
+            path: '/'
+          };
+        }),
         userAgent: new UserAgent().toString()
       });
 
@@ -34,7 +30,7 @@ async function openPage() {
       await page.waitForTimeout(30000);
       resolve();
     } catch (error) {
-      console.error('error:', error);
+      console.error('حدث خطأ:', error);
       reject(error);
     } finally {
       if (browser) {
@@ -47,18 +43,17 @@ async function openPage() {
 async function executeInParallel() {
   const promises = [];
   for (let i = 0; i < 1; i++) {
-    const userAgent = new UserAgent();
-    promises.push(openPage(userAgent.toString()));
+    promises.push(openPage());
   }
   await Promise.all(promises).catch(error => {
-    console.error('error running the codes:', error);
+    console.error('حدث خطأ أثناء تشغيل الأكواد:', error);
   });
 }
 
 async function repeatForever() {
   while (true) {
     await executeInParallel();
-    console.log(`watching again: ${url}`);
+    console.log(`متابعة مشاهدة: ${url}`);
   }
 }
 
